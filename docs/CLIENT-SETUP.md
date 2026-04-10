@@ -10,7 +10,7 @@ Live config:
 
 Managed by sync:
 
-- `openaiDeveloperDocs`
+- `developerDocs`
 
 Notes:
 
@@ -25,7 +25,7 @@ Live config:
 
 Managed by sync:
 
-- `openaiDeveloperDocs`
+- `developerDocs`
 - Keychain-backed `github`
 
 Notes:
@@ -40,7 +40,7 @@ Live config:
 
 Managed by sync:
 
-- `openaiDeveloperDocs`
+- `developerDocs`
 
 Notes:
 
@@ -55,7 +55,7 @@ Live config:
 
 Managed by sync:
 
-- `openaiDeveloperDocs`
+- `developerDocs`
 - Keychain-backed `github-mcp-server`
 
 Preserved but not managed by this repo:

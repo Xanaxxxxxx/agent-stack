@@ -1,7 +1,7 @@
 # Copy selected entries into ~/.codex/config.toml.
 # Keep this file as a template source, not a live secret store.
 
-[mcp_servers.openaiDeveloperDocs]
+[mcp_servers.developerDocs]
 url = "https://developers.openai.com/mcp"
 
 [mcp_servers.github]

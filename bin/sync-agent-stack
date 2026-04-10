@@ -10,6 +10,8 @@ HOME = Path.home()
 AGENT_STACK = HOME / ".agent-stack"
 KEYCHAIN_WRAPPER = str(AGENT_STACK / "bin" / "agent-env-keychain")
 OPENAI_DOCS_URL = "https://developers.openai.com/mcp"
+DOCS_MCP_NAME = "developerDocs"
+LEGACY_DOCS_MCP_NAME = "openaiDeveloperDocs"
 GITHUB_ARGS = [
     "docker",
     "run",
@@ -43,17 +45,23 @@ def ensure_codex() -> None:
     text = read_text(path)
     changed = False
 
-    openai_block = '\n[mcp_servers.openaiDeveloperDocs]\nurl = "https://developers.openai.com/mcp"\n'
-    if "[mcp_servers.openaiDeveloperDocs]" not in text:
+    legacy_block = '\n[mcp_servers.openaiDeveloperDocs]\nurl = "https://developers.openai.com/mcp"\n'
+    current_block = '\n[mcp_servers.developerDocs]\nurl = "https://developers.openai.com/mcp"\n'
+    if legacy_block in text:
+        text = text.replace(legacy_block, "")
+        changed = True
+        log("Codex: removed legacy openaiDeveloperDocs")
+
+    if "[mcp_servers.developerDocs]" not in text:
         anchor = 'sandbox_mode = "workspace-write"\n'
         if anchor in text:
-            text = text.replace(anchor, anchor + openai_block, 1)
+            text = text.replace(anchor, anchor + current_block, 1)
         else:
-            text += openai_block
+            text += current_block
         changed = True
-        log("Codex: added openaiDeveloperDocs")
+        log("Codex: added developerDocs")
     else:
-        log("Codex: kept existing openaiDeveloperDocs")
+        log("Codex: kept existing developerDocs")
 
     if changed:
         write_text(path, text)
@@ -75,12 +83,16 @@ def ensure_cursor() -> None:
     changed = False
 
     desired_openai = {"url": OPENAI_DOCS_URL}
-    if servers.get("openaiDeveloperDocs") != desired_openai:
-        servers["openaiDeveloperDocs"] = desired_openai
+    if LEGACY_DOCS_MCP_NAME in servers:
+        servers.pop(LEGACY_DOCS_MCP_NAME, None)
         changed = True
-        log("Cursor: synced openaiDeveloperDocs")
+        log("Cursor: removed legacy openaiDeveloperDocs")
+    if servers.get(DOCS_MCP_NAME) != desired_openai:
+        servers[DOCS_MCP_NAME] = desired_openai
+        changed = True
+        log("Cursor: synced developerDocs")
     else:
-        log("Cursor: kept existing openaiDeveloperDocs")
+        log("Cursor: kept existing developerDocs")
 
     desired_github = {
         "command": "/bin/zsh",
@@ -112,13 +124,17 @@ def ensure_claude() -> None:
 
     servers = data.setdefault("mcpServers", {})
     desired = {"type": "http", "url": OPENAI_DOCS_URL}
-    if servers.get("openaiDeveloperDocs") == desired:
-        log("Claude Code: kept existing openaiDeveloperDocs")
+    if LEGACY_DOCS_MCP_NAME in servers:
+        servers.pop(LEGACY_DOCS_MCP_NAME, None)
+        log("Claude Code: removed legacy openaiDeveloperDocs")
+
+    if servers.get(DOCS_MCP_NAME) == desired:
+        log("Claude Code: kept existing developerDocs")
         return
 
-    servers["openaiDeveloperDocs"] = desired
+    servers[DOCS_MCP_NAME] = desired
     write_text(path, json.dumps(data, indent=2) + "\n")
-    log("Claude Code: synced openaiDeveloperDocs")
+    log("Claude Code: synced developerDocs")
 
 
 def ensure_antigravity() -> None:
@@ -132,12 +148,16 @@ def ensure_antigravity() -> None:
     changed = False
 
     desired_openai = {"url": OPENAI_DOCS_URL}
-    if servers.get("openaiDeveloperDocs") != desired_openai:
-        servers["openaiDeveloperDocs"] = desired_openai
+    if LEGACY_DOCS_MCP_NAME in servers:
+        servers.pop(LEGACY_DOCS_MCP_NAME, None)
         changed = True
-        log("Antigravity: synced openaiDeveloperDocs")
+        log("Antigravity: removed legacy openaiDeveloperDocs")
+    if servers.get(DOCS_MCP_NAME) != desired_openai:
+        servers[DOCS_MCP_NAME] = desired_openai
+        changed = True
+        log("Antigravity: synced developerDocs")
     else:
-        log("Antigravity: kept existing openaiDeveloperDocs")
+        log("Antigravity: kept existing developerDocs")
 
     desired_github = {
         "$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate",

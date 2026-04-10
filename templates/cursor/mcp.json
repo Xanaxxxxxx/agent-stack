@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "openaiDeveloperDocs": {
+    "developerDocs": {
       "url": "https://developers.openai.com/mcp"
     },
     "github": {

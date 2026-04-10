@@ -1,12 +1,12 @@
 # Agent Stack
 
-Local multi-agent runtime for coding clients on one machine.
+A local runtime layer for managing multiple AI coding clients on one machine.
 
-`agent-stack` exists to solve one specific problem:
+`agent-stack` exists to solve one operational problem:
 
-You should not have to re-create the same toolchain, secrets, and MCP setup for every new AI coding client.
+You should not have to rebuild the same MCP config, secret-loading path, and operating context every time you install a new coding agent.
 
-Instead of configuring each client from scratch, this repo defines:
+Instead of treating each client as its own silo, this repo provides:
 
 - a shared MCP layer
 - a shared documentation layer
@@ -20,6 +20,19 @@ Current clients:
 - Claude Code
 - Antigravity
 
+## At a Glance
+
+`agent-stack` is for people who are already using more than one AI coding client and want the machine underneath them to feel consistent.
+
+It is designed to reduce four kinds of repeated work:
+
+- re-adding the same MCP tools in every client
+- re-storing the same credentials in multiple places
+- re-explaining the same operating rules in client-specific formats
+- re-auditing which client should own which capability
+
+The repo treats local AI tooling as infrastructure, not as app-by-app setup.
+
 ## What This Is
 
 `agent-stack` is not an app. It is a local platform layer.
@@ -32,6 +45,17 @@ It standardizes how multiple AI clients on the same machine access:
 - client-specific allowlists and exceptions
 
 The goal is not to make every client identical. The goal is to make them predictable.
+
+## Who This Is For
+
+This repo is most useful if you:
+
+- actively use more than one coding agent
+- want MCP access to be managed intentionally rather than ad hoc
+- care about keeping secrets out of repo files and scattered client configs
+- want a repeatable local runtime you can evolve over time
+
+If you only use one client and do not care about shared local infrastructure yet, this repo is probably more than you need.
 
 ## Why This Exists
 
@@ -97,10 +121,10 @@ Managed configuration flow:
 flowchart LR
     Sync["sync-agent-stack"]
 
-    Sync --> Codex["Codex\nopenaiDeveloperDocs"]
-    Sync --> Cursor["Cursor\nopenaiDeveloperDocs + github"]
-    Sync --> Claude["Claude Code\nopenaiDeveloperDocs"]
-    Sync --> Anti["Antigravity\nopenaiDeveloperDocs + github-mcp-server"]
+    Sync --> Codex["Codex\ndeveloperDocs"]
+    Sync --> Cursor["Cursor\ndeveloperDocs + github"]
+    Sync --> Claude["Claude Code\ndeveloperDocs"]
+    Sync --> Anti["Antigravity\ndeveloperDocs + github-mcp-server"]
 
     Keychain["macOS Keychain"] --> Wrapper["agent-env-keychain"]
     Wrapper --> Cursor
@@ -111,10 +135,10 @@ Current client policy:
 
 | Client | Managed entries | Notes |
 |---|---|---|
-| Codex | `openaiDeveloperDocs` | Built-in plugins cover other major domains |
-| Cursor | `openaiDeveloperDocs`, `github` | GitHub runs through the Keychain wrapper |
-| Claude Code | `openaiDeveloperDocs` | Minimal managed setup |
-| Antigravity | `openaiDeveloperDocs`, `github-mcp-server` | Existing non-managed MCP entries are preserved |
+| Codex | `developerDocs` | Built-in plugins cover other major domains |
+| Cursor | `developerDocs`, `github` | GitHub runs through the Keychain wrapper |
+| Claude Code | `developerDocs` | Minimal managed setup |
+| Antigravity | `developerDocs`, `github-mcp-server` | Existing non-managed MCP entries are preserved |
 
 ## Runtime Model
 
@@ -190,10 +214,10 @@ The sync tool is intentionally conservative. It only manages entries with an exp
 
 | Client | Managed by `sync-agent-stack` | Notes |
 |---|---|---|
-| Codex | `openaiDeveloperDocs` | Avoids duplicating built-in GitHub and Figma plugin coverage |
-| Cursor | `openaiDeveloperDocs`, `github` | GitHub runs through the Keychain wrapper |
-| Claude Code | `openaiDeveloperDocs` | Current endpoint may still be subject to network access restrictions |
-| Antigravity | `openaiDeveloperDocs`, `github-mcp-server` | Existing non-managed MCP entries are preserved |
+| Codex | `developerDocs` | Avoids duplicating built-in GitHub and Figma plugin coverage |
+| Cursor | `developerDocs`, `github` | GitHub runs through the Keychain wrapper |
+| Claude Code | `developerDocs` | Current endpoint may still be subject to network access restrictions |
+| Antigravity | `developerDocs`, `github-mcp-server` | Existing non-managed MCP entries are preserved |
 
 ## Security Model
 
