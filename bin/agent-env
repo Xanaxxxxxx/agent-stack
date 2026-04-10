@@ -1,0 +1,8 @@
+#!/bin/zsh
+set -a
+ENV_FILE="${HOME}/.agent-stack/env/common.env"
+if [ -f "$ENV_FILE" ]; then
+  . "$ENV_FILE"
+fi
+set +a
+exec "$@"

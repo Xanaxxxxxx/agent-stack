@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "openaiDeveloperDocs": {
+      "url": "https://developers.openai.com/mcp"
+    },
+    "github": {
+      "command": "/bin/zsh",
+      "args": [
+        "-lc",
+        "\"$HOME/.agent-stack/bin/agent-env-keychain\" docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server"
+      ],
+      "env": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+# Copy selected entries into ~/.codex/config.toml.
+# Keep this file as a template source, not a live secret store.
+
+[mcp_servers.openaiDeveloperDocs]
+url = "https://developers.openai.com/mcp"
+
+[mcp_servers.github]
+command = "docker"
+args = ["run", "-i", "--rm", "-e", "GITHUB_PERSONAL_ACCESS_TOKEN", "ghcr.io/github/github-mcp-server"]
+
+[mcp_servers.github.env]
+GITHUB_PERSONAL_ACCESS_TOKEN = "${GITHUB_TOKEN}"

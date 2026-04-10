@@ -1,0 +1,177 @@
+#!/usr/bin/env python3
+
+import json
+import shutil
+import sys
+from pathlib import Path
+
+
+HOME = Path.home()
+AGENT_STACK = HOME / ".agent-stack"
+KEYCHAIN_WRAPPER = str(AGENT_STACK / "bin" / "agent-env-keychain")
+OPENAI_DOCS_URL = "https://developers.openai.com/mcp"
+GITHUB_ARGS = [
+    "docker",
+    "run",
+    "-i",
+    "--rm",
+    "-e",
+    "GITHUB_PERSONAL_ACCESS_TOKEN",
+    "ghcr.io/github/github-mcp-server",
+]
+
+
+def log(message: str) -> None:
+    print(message)
+
+
+def read_text(path: Path) -> str:
+    return path.read_text() if path.exists() else ""
+
+
+def write_text(path: Path, content: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content)
+
+
+def ensure_codex() -> None:
+    path = HOME / ".codex" / "config.toml"
+    if not path.exists():
+      log("Codex: skipped, no ~/.codex/config.toml")
+      return
+
+    text = read_text(path)
+    changed = False
+
+    openai_block = '\n[mcp_servers.openaiDeveloperDocs]\nurl = "https://developers.openai.com/mcp"\n'
+    if "[mcp_servers.openaiDeveloperDocs]" not in text:
+        anchor = 'sandbox_mode = "workspace-write"\n'
+        if anchor in text:
+            text = text.replace(anchor, anchor + openai_block, 1)
+        else:
+            text += openai_block
+        changed = True
+        log("Codex: added openaiDeveloperDocs")
+    else:
+        log("Codex: kept existing openaiDeveloperDocs")
+
+    if changed:
+        write_text(path, text)
+    else:
+        log("Codex: no changes")
+
+
+def ensure_cursor() -> None:
+    path = HOME / ".cursor" / "mcp.json"
+    if not (HOME / ".cursor").exists():
+        log("Cursor: skipped, no ~/.cursor directory")
+        return
+
+    data = {"mcpServers": {}}
+    if path.exists():
+        data = json.loads(path.read_text())
+
+    servers = data.setdefault("mcpServers", {})
+    changed = False
+
+    desired_openai = {"url": OPENAI_DOCS_URL}
+    if servers.get("openaiDeveloperDocs") != desired_openai:
+        servers["openaiDeveloperDocs"] = desired_openai
+        changed = True
+        log("Cursor: synced openaiDeveloperDocs")
+    else:
+        log("Cursor: kept existing openaiDeveloperDocs")
+
+    desired_github = {
+        "command": "/bin/zsh",
+        "args": ["-lc", "\"$HOME/.agent-stack/bin/agent-env-keychain\" " + " ".join(GITHUB_ARGS)],
+        "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"},
+    }
+    if servers.get("github") != desired_github:
+        servers["github"] = desired_github
+        changed = True
+        log("Cursor: synced github")
+    else:
+        log("Cursor: kept existing github")
+
+    if changed:
+        write_text(path, json.dumps(data, indent=2) + "\n")
+    else:
+        log("Cursor: no changes")
+
+
+def ensure_claude() -> None:
+    if shutil.which("claude") is None:
+        log("Claude Code: skipped, no claude CLI found")
+        return
+
+    path = HOME / ".claude.json"
+    data = {}
+    if path.exists():
+        data = json.loads(path.read_text())
+
+    servers = data.setdefault("mcpServers", {})
+    desired = {"type": "http", "url": OPENAI_DOCS_URL}
+    if servers.get("openaiDeveloperDocs") == desired:
+        log("Claude Code: kept existing openaiDeveloperDocs")
+        return
+
+    servers["openaiDeveloperDocs"] = desired
+    write_text(path, json.dumps(data, indent=2) + "\n")
+    log("Claude Code: synced openaiDeveloperDocs")
+
+
+def ensure_antigravity() -> None:
+    path = HOME / ".gemini" / "antigravity" / "mcp_config.json"
+    if not path.exists():
+        log("Antigravity: skipped, no ~/.gemini/antigravity/mcp_config.json")
+        return
+
+    data = json.loads(path.read_text())
+    servers = data.setdefault("mcpServers", {})
+    changed = False
+
+    desired_openai = {"url": OPENAI_DOCS_URL}
+    if servers.get("openaiDeveloperDocs") != desired_openai:
+        servers["openaiDeveloperDocs"] = desired_openai
+        changed = True
+        log("Antigravity: synced openaiDeveloperDocs")
+    else:
+        log("Antigravity: kept existing openaiDeveloperDocs")
+
+    desired_github = {
+        "$typeName": "exa.cascade_plugins_pb.CascadePluginCommandTemplate",
+        "command": "/bin/zsh",
+        "args": ["-lc", "\"$HOME/.agent-stack/bin/agent-env-keychain\" " + " ".join(GITHUB_ARGS)],
+        "env": {"GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"},
+        "disabled": False,
+    }
+    if servers.get("github-mcp-server") != desired_github:
+        servers["github-mcp-server"] = desired_github
+        changed = True
+        log("Antigravity: synced github-mcp-server")
+    else:
+        log("Antigravity: kept existing github-mcp-server")
+
+    if changed:
+        write_text(path, json.dumps(data, indent=2) + "\n")
+    else:
+        log("Antigravity: no changes")
+
+
+def main() -> int:
+    if not Path(KEYCHAIN_WRAPPER).exists():
+        log("Missing Keychain wrapper: ~/.agent-stack/bin/agent-env-keychain")
+        return 1
+
+    log("Syncing agent-stack managed MCP entries")
+    ensure_codex()
+    ensure_cursor()
+    ensure_claude()
+    ensure_antigravity()
+    log("Done")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
