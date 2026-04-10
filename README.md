@@ -2,79 +2,21 @@
 
 A local runtime layer for managing multiple AI coding clients on one machine.
 
-`agent-stack` exists to solve one operational problem:
+`agent-stack` exists to keep multi-agent development environments consistent. Instead of rebuilding MCP config, secret-loading, and operating rules for every client, it provides one shared layer for tooling, documentation, and sync policy.
 
-You should not have to rebuild the same MCP config, secret-loading path, and operating context every time you install a new coding agent.
-
-Instead of treating each client as its own silo, this repo provides:
-
-- a shared MCP layer
-- a shared documentation layer
-- a shared secret-loading strategy
-- a rules-driven sync mechanism for supported clients
-
-Current clients:
+It currently supports:
 
 - Codex
 - Cursor
 - Claude Code
 - Antigravity
 
-## At a Glance
+At a high level, the repo provides:
 
-`agent-stack` is for people who are already using more than one AI coding client and want the machine underneath them to feel consistent.
-
-It is designed to reduce four kinds of repeated work:
-
-- re-adding the same MCP tools in every client
-- re-storing the same credentials in multiple places
-- re-explaining the same operating rules in client-specific formats
-- re-auditing which client should own which capability
-
-The repo treats local AI tooling as infrastructure, not as app-by-app setup.
-
-## What This Is
-
-`agent-stack` is not an app. It is a local platform layer.
-
-It standardizes how multiple AI clients on the same machine access:
-
-- shared MCP servers
-- shared operational docs
-- shared secret-loading behavior
-- client-specific allowlists and exceptions
-
-The goal is not to make every client identical. The goal is to make them predictable.
-
-## Who This Is For
-
-This repo is most useful if you:
-
-- actively use more than one coding agent
-- want MCP access to be managed intentionally rather than ad hoc
-- care about keeping secrets out of repo files and scattered client configs
-- want a repeatable local runtime you can evolve over time
-
-If you only use one client and do not care about shared local infrastructure yet, this repo is probably more than you need.
-
-## Why This Exists
-
-Without a shared runtime layer, the default workflow usually looks like this:
-
-- install a new client
-- re-enter tokens
-- re-add GitHub or Figma tools
-- re-figure out where config files live
-- re-document rules in a client-specific prompt format
-
-That does not scale.
-
-This repo treats local AI tooling more like developer infrastructure:
-
-- tools live behind MCP where practical
-- durable instructions live in Markdown
-- secrets live in Keychain
-- each client keeps only a thin adapter config
+- a shared MCP layer
+- a shared documentation layer
+- a shared secret-loading strategy
+- a rules-driven sync mechanism for supported clients
 
 ## Design Principles
 
