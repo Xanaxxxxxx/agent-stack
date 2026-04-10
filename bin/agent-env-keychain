@@ -1,12 +1,16 @@
 #!/bin/zsh
 set -euo pipefail
-PREFIX="${AGENT_STACK_KEYCHAIN_PREFIX:-agent-stack-macbook}"
+PRIMARY_PREFIX="${AGENT_STACK_KEYCHAIN_PREFIX:-agent-stack}"
 load_secret() {
   local key="$1"
   local value
-  if value=$(security find-generic-password -a "$USER" -s "$PREFIX/$key" -w 2>/dev/null); then
-    export "$key=$value"
-  fi
+  local prefix
+  for prefix in "$PRIMARY_PREFIX" "agent-stack-macbook"; do
+    if value=$(security find-generic-password -a "$USER" -s "$prefix/$key" -w 2>/dev/null); then
+      export "$key=$value"
+      return
+    fi
+  done
 }
 load_secret OPENAI_API_KEY
 load_secret ANTHROPIC_API_KEY

@@ -1,20 +1,43 @@
 # Commands
 
-This file is for machine-wide command conventions that multiple clients can rely on.
+Reference commands for operating this repo.
 
-## Environment
-- Shared env file: `~/.agent-stack/env/common.env`
-- Env loader wrapper: `~/.agent-stack/bin/agent-env`
-- Keychain env loader wrapper: `~/.agent-stack/bin/agent-env-keychain`
+## Core Commands
 
-## Recommended patterns
-- Run a command with shared env: `~/.agent-stack/bin/agent-env <command> ...`
-- Run a command with Keychain-backed secrets: `~/.agent-stack/bin/agent-env-keychain <command> ...`
-- Keep reusable scripts in `~/.agent-stack/bin/`
-- Keep reusable MCP definitions in `~/.agent-stack/mcp/registry/base.mcp.json`
-- Sync supported clients: `~/.agent-stack/bin/sync-agent-stack`
+Sync managed client config:
+
+```bash
+~/.agent-stack/bin/sync-agent-stack
+```
+
+Run a command with placeholder env loading:
+
+```bash
+~/.agent-stack/bin/agent-env <command> ...
+```
+
+Run a command with Keychain-backed secret loading:
+
+```bash
+~/.agent-stack/bin/agent-env-keychain <command> ...
+```
+
+## Typical Use Cases
+
+Re-apply MCP policy after pulling repo updates:
+
+```bash
+~/.agent-stack/bin/sync-agent-stack
+```
+
+Run a secret-bearing subprocess through the shared wrapper:
+
+```bash
+~/.agent-stack/bin/agent-env-keychain docker run ...
+```
 
 ## Notes
-- Avoid storing secrets in shell history.
-- Prefer system Keychain backed flows over plaintext env files.
-- Keep project-specific commands documented in each repo.
+
+- `common.env` is no longer the primary runtime secret source.
+- Prefer the Keychain wrapper for any command that requires credentials.
+- Keep project-specific command references in the project repo, not here.

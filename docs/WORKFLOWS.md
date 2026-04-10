@@ -1,30 +1,50 @@
 # Workflows
 
-## Add a new MCP server
-1. Add it to `mcp/registry/base.mcp.json`.
-2. Prefer the Keychain wrapper over plaintext secret files when the server needs credentials.
-3. Copy or adapt the server entry into each client config only when needed.
-4. Prefer project-level config for repo-specific tools.
+Operational workflows for extending and maintaining this repo.
 
-## Add a new client
-1. Keep the client config thin.
-2. Point it to the same MCP server definitions.
-3. Make the client read this Markdown layer first.
-4. Avoid duplicating workflow logic inside client-specific prompts.
+## Sync Managed Clients
 
-## Sync managed clients
-1. Run `~/.agent-stack/bin/sync-agent-stack`.
-2. The sync script detects supported clients by their install or config footprint.
-3. It only manages explicitly approved MCP entries.
-4. It does not try to infer whether a built-in plugin is fully equivalent to an MCP server.
+Use the sync script as the default path:
 
-## Current sync policy
-1. `Codex`: ensure `openaiDeveloperDocs` only.
-2. `Cursor`: ensure `openaiDeveloperDocs` and Keychain-backed `github`.
-3. `Claude Code`: ensure `openaiDeveloperDocs` only.
-4. `Antigravity`: ensure `openaiDeveloperDocs` and Keychain-backed `github-mcp-server`.
+```bash
+~/.agent-stack/bin/sync-agent-stack
+```
 
-## Add a new project
-1. Keep machine-wide tools in `~/.agent-stack`.
-2. Add repo docs such as `AGENTS.md`, `docs/commands.md`, and `docs/coding-standards.md` in the project.
-3. Add repo-local MCP config only for tools that depend on that repo.
+What it does:
+
+1. Detects supported clients by install or config footprint.
+2. Applies only the MCP entries explicitly managed for that client.
+3. Leaves unrelated config intact.
+
+What it does not do:
+
+1. It does not guess whether every built-in plugin equals every MCP server.
+2. It does not rewrite unrelated user settings.
+3. It does not manage unsupported clients.
+
+## Add a New MCP Server
+
+1. Define the server in the registry or templates.
+2. Decide whether it needs Keychain-backed secret loading.
+3. Decide which clients should manage it through sync.
+4. Update docs before relying on it operationally.
+
+## Add a New Client
+
+1. Identify the client’s live config surface.
+2. Decide which MCP entries should be managed.
+3. Encode that policy in `sync-agent-stack`.
+4. Document the client in `docs/CLIENT-SETUP.md`.
+
+## Add a New Project
+
+1. Keep machine-wide concerns in `~/.agent-stack`.
+2. Put project-specific docs and repo-local MCP in the project repo.
+3. Avoid moving project policy into the global runtime unless it is truly reusable.
+
+## Change Secret Strategy
+
+1. Update wrappers first.
+2. Update sync behavior second.
+3. Update docs immediately after.
+4. Migrate live configs only after the new path is verified.

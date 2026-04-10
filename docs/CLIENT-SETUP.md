@@ -1,30 +1,69 @@
 # Client Setup
 
+Client setup is intentionally asymmetric. Each client should get only the MCP entries that make sense for that client.
+
 ## Codex
-- Live config file: `~/.codex/config.toml`
-- Template source: `~/.agent-stack/templates/codex/config.toml`
-- Prefer `~/.agent-stack/bin/sync-agent-stack` over manual edits.
-- Current managed entries: `openaiDeveloperDocs`
+
+Live config:
+
+- `~/.codex/config.toml`
+
+Managed by sync:
+
+- `openaiDeveloperDocs`
+
+Notes:
+
+- Codex already has strong built-in plugin coverage for some domains.
+- The sync policy avoids layering duplicate GitHub or Figma MCP entries on top of those built-ins.
 
 ## Cursor
-- Live config file: `~/.cursor/mcp.json`
-- Template source: `~/.agent-stack/templates/cursor/mcp.json`
-- Prefer `~/.agent-stack/bin/sync-agent-stack` over manual edits.
-- Current managed entries: `openaiDeveloperDocs`, Keychain-backed `github`
+
+Live config:
+
+- `~/.cursor/mcp.json`
+
+Managed by sync:
+
+- `openaiDeveloperDocs`
+- Keychain-backed `github`
+
+Notes:
+
+- Cursor is expected to consume the shared GitHub MCP path from this repo.
 
 ## Claude Code
-- Use the Claude MCP CLI for durable setup when possible.
-- Template notes: `~/.agent-stack/templates/claude-code/README.md`
-- Prefer user scope for personal tools and project scope for repo-specific tools.
-- Current managed entries: `openaiDeveloperDocs`
+
+Live config:
+
+- `~/.claude.json`
+
+Managed by sync:
+
+- `openaiDeveloperDocs`
+
+Notes:
+
+- Claude Code configuration is intentionally minimal.
+- Network access to the remote OpenAI MCP endpoint may still vary by environment.
 
 ## Antigravity
-- Open Manage MCP Servers.
-- Open the raw MCP config editor.
-- Use `~/.agent-stack/templates/antigravity/mcp_config.json` as the source template.
-- Prefer `~/.agent-stack/bin/sync-agent-stack` over manual edits.
-- Current managed entries: `openaiDeveloperDocs`, Keychain-backed `github-mcp-server`
 
-## Shared rule
-- All clients should point to the same MCP servers and shared Keychain-backed secret loader.
-- Do not duplicate server logic per client.
+Live config:
+
+- `~/.gemini/antigravity/mcp_config.json`
+
+Managed by sync:
+
+- `openaiDeveloperDocs`
+- Keychain-backed `github-mcp-server`
+
+Preserved but not managed by this repo:
+
+- existing non-agent-stack MCP entries, such as local or vendor-specific integrations
+
+## Policy
+
+- Shared logic belongs in this repo, not duplicated across clients.
+- Live configs may differ, but they should differ for explicit reasons.
+- The sync script is the preferred interface for applying managed entries.

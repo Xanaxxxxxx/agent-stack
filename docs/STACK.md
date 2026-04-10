@@ -1,52 +1,78 @@
 # Stack
 
-## Layers
+Layer model for the local multi-agent runtime.
 
-### 1. System layer
-Shared runtimes and CLIs installed once on the machine:
+## Layer 1: System
+
+Shared machine-level dependencies installed once:
+
 - git
 - node / npm / npx
 - python / uv / pipx
 - docker
-- xcodebuild and simulator tooling when needed
+- other local CLIs required by specific MCP servers
 
-### 2. MCP layer
-Reusable tool servers shared by multiple clients:
-- remote HTTP MCP servers
-- local stdio MCP servers
-- Docker-packaged MCP servers
-- custom local wrappers
+## Layer 2: Secret Loading
 
-### Secret loading
-Secrets are loaded from macOS Keychain through the shared wrapper:
+Primary secret source:
+
+- macOS Keychain
+
+Shared runtime wrapper:
+
 - `~/.agent-stack/bin/agent-env-keychain`
 
-Plaintext env files are no longer the primary runtime source of secrets.
-`~/.agent-stack/env/common.env` remains as a placeholder and template only.
+Compatibility wrapper:
 
-### 3. Markdown context layer
-Cross-client docs that describe:
-- architecture and project context
-- coding standards
-- common commands
-- review and release workflows
+- `~/.agent-stack/bin/agent-env`
 
-### 4. Client adapter layer
-Thin config for each client that points to the same MCP layer and docs.
+Notes:
 
-## Directory layout
+- `common.env` exists as a placeholder and bootstrap artifact.
+- It is not the preferred runtime source for active credentials.
+
+## Layer 3: MCP
+
+Reusable tool access exposed through:
+
+- remote HTTP MCP servers
+- local stdio MCP servers
+- Docker-backed MCP subprocesses
+- thin wrappers that standardize env injection
+
+## Layer 4: Documentation
+
+Cross-client knowledge lives in Markdown:
+
+- architecture
+- policy
+- command references
+- client setup rules
+
+## Layer 5: Client Adapters
+
+Each supported client keeps a thin live config that points into the shared runtime.
+
+Current targets:
+
+- Codex
+- Cursor
+- Claude Code
+- Antigravity
+
+## Layout
 
 ```text
 ~/.agent-stack/
-  env/
-  mcp/registry/
-  docs/
-  templates/
   bin/
+  docs/
+  env/
+  mcp/
+  templates/
 ```
 
-## Scope guidance
-- Put machine-wide tools here.
-- Put project-specific MCP config inside each repo.
-- Keep secrets out of templates.
-- Use Keychain for real secrets whenever possible.
+## Scope
+
+- Put machine-wide runtime concerns here.
+- Put project-specific MCP config inside the project repo.
+- Keep this repo generic enough to move between machines.
